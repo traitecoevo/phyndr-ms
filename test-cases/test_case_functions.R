@@ -12,4 +12,6 @@ wood<-read.csv("GlobalWoodinessDatabase.csv")
 sr<-calculate.overlap("Vascular_Plants_rooted.dated.tre",wood$gs)
 
 
+wood<-read.csv("GlobalWoodinessDatabase.csv")
+sr<-calculate.overlap("Conifer-timetree.tre",wood$gs)
 
