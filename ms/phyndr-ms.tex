@@ -48,10 +48,13 @@ $^{*}$ Email for correspondence: \texttt{mwpennell@gmail.com}\\
 \singlespacing
 \section{Abstract}
 \begin{enumerate}
-\item Problem
-\item Approach
-\item R Package
-\item \emph{Synthesis:} Useful addition to comparative biologists' workflows
+\item Comparative biologists are increasingly using curated, public data sets to conduct large-scale phylogenetic analyses. A consequence of this is that there is often a mismatch between lineages for which there is phylogenetic data and those for which trait data is available. Researchers are commonly forced to either drop species from analyses entirely or else impute data in some way.
+
+\item Here we point out a simple solution to mediate this problem: if some external information on topology or taxonomy is known, this can be used to exchange species in the tree that lack data for species in the data that are not placed in the phylogeny. We develop an algorithm to automatically reason through all permissable label exchanges while making minimal assumptions. This approach avoids the biases introduced by other methods.
+
+\item We have implemented our method in a new R package \textsc{phyndr} which will allow researchers to make use of our algorithm at large scales where reasoning through and computing all permissable label exchanges becomes difficult.
+
+\item \emph{Synthesis:} We think that \textsc{phyndr} will be a useful addition to comparative biologists' workflows, especially when used in conjuction with emerging taxonomic/phylogenetic resources and bioinformatic tools.
 \end{enumerate}
 
 \vfill
