@@ -1,0 +1,7 @@
+sowsear:
+  source: github
+  repo: richfitz/sowsear
+
+phyndr:
+  source: github
+  repo: richfitz/phyndr
