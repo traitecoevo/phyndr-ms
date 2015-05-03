@@ -19,7 +19,7 @@
 
 \title{A simple approach for maximizing the intersection of phylogenetic and comparative data}
 \author{
-Matthew W. Pennell$^{1,2,\dag,*}$, Richard G. FitzJohn$^{3,\dag}$, and William K. Cornwell$^{4}$
+Matthew W. Pennell$^{1,2,\dag,*}$, Richard G. FitzJohn$^{3,\dag}$, and William K. Cornwell$^{4,\dag}$
 }
 
 \date{}
@@ -53,7 +53,9 @@ $^{*}$ Email for correspondence: \texttt{mwpennell@gmail.com}\\
 
 \item We have implemented our method in a new R package \textsc{phyndr}, which will allow researchers to make use of our algorithm at large scales where reasoning through and computing all permissible label exchanges becomes difficult.
 
-\item \emph{Synthesis:} We think that \textsc{phyndr} will be a useful addition to comparative biologists' workflows, in conjunction with emerging taxonomic/phylogenetic resources and tools for biodiversity informatics.
+\item To facilitate the use of taxonomic knowledge for making label swaps (at least for plants), we have created a separate data package \textsc{TaxonLookup}; it contains a expert-curated taxonomy for all vascular plants and is interoperable with \textsc{phyndr}. Similar resources could be developed for other groups.
+
+\item \emph{Synthesis:} We think that \textsc{phyndr} will be a useful addition to comparative biologists' workflows, in conjunction with emerging taxonomic/phylogenetic resources (including \textsc{TaxonLookup}) and tools for evolutionary informatics.
 \end{enumerate}
 
 \vfill
@@ -69,7 +71,7 @@ While such an approach may be very useful for many applications, such as diversi
 
 The problem of a mismatch between phylogenetic and trait data could be tackled from the other direction---some lineages may be included in the phylogeny without a corresponding trait value in the dataset---using some sort of data imputation method. A number of recent studies have suggested approaches to accomplish this, some using the parameters of a phylogenetic model \citep{Fagan2013, Swenson2014, PEM} and another using a taxonomic sampling model \citep{FitzJohn2014}. These each have their benefits and drawbacks: using phylogenetic models assumes the observed trait values are a random sample of the distribution of trait values, an assumption that may often be egregiously violated \citep{FitzJohn2014}, whereas taxonomy-based approaches do not make full use of the structure of the phylogeny and must assume some sort of sampling distribution for the traits. In any case, all of these involve various assumptions about the unknown states and the validity of these may be difficult to assess in many cases.
 
-The strategies described above are potentially useful for increasing the overlap between the tree and the comparative dataset, but as noted, they may have unintended (and in many cases, poorly understood) consequences for downstream comparative analyses. There is, however, a much simpler approach that has to our knowledge been largely overlooked by biologists \citep[but see][for an example]{Pennell2015}: swap unmatched species in the tree with unmatched species in the data that carry equivalent information content. 
+The strategies described above are potentially useful for increasing the overlap between the tree and the comparative dataset, but as noted, they may have unintended (and in many cases, poorly understood) consequences for downstream comparative analyses. There is, however, a much simpler approach that has to our knowledge been mostly overlooked by biologists: swap unmatched species in the tree with unmatched species in the data that carry equivalent information content. 
 
 Consider a four taxon tree (figure 1A) of the structure $(((\mathcal{A},\mathcal{B}),\mathcal{C}),\mathcal{D})$. If the reconstructed tree contains only taxa $\mathcal{A}$, $\mathcal{C}$, and $\mathcal{D}$, such that the resulting tree has the topology $((\mathcal{A},\mathcal{C}),\mathcal{D}$) but our dataset only contains taxa $\mathcal{B}$, $\mathcal{C}$, and $\mathcal{D}$, then taxa $\mathcal{A}$ can be relabeled as  $\mathcal{B}$  without any loss of information. If we simply dropped unmatched taxa, our analysis would only contain 2 taxa, $\mathcal{C}$ and $\mathcal{D}$, whereas if we performed the label swap, we would have 3 taxa in our analysis.
 
@@ -77,68 +79,102 @@ This example demonstrates that if external knowledge is available, either in the
 
 \section{Label swapping algorithm}
 
-\subsection{Definitions of terms}
+We have developed an algorithm for relabeling the tip labels of a supplied \emph{chronogram}, given a list of species with \emph{trait data} and a externally supplied \emph{guide}---that is the guide is distinct from the chronogram. The guide may be either a \emph{topological tree}, a tree containing a more inclusive set of taxa then the chronogram, or else a supplied \emph{taxonomy}. The algorithm differs slightly depending on the type of guide supplied so we deal with these each in turn.
 
-topotree
+We conjecture---that is, we suggest without a formal proof---that whether a topological tree or taxonomy is supplied as a guide, our algorithm will always maximize the intersection of the species in the phylogeny and the dataset without inducing any splits that do not occur in the guide.
 
-chronogram
+\subsection{Using a complete toplogy}
 
-\subsection{Description of algorithm}
+Most modern phylogenetic comparative methods are model-based \citep[recently reviewed by][]{PennellHarmon}, such that branch lengths must be in units of time for analysis. However, topological information may be available from a larger set of the taxa than included in the estimated chronogram---such topological trees may come from large supermatrix phylogenies, supertrees, mega-phylogenies \citep[\emph{sensu}][]{Smithmega} or more recently, from synthetic tree alignment graphs \citep{Smith2013}, such as those generated by the \textsc{OpenTree} project \citep{OpenTree}.
 
-We conjecture---that is, we suggest without a formal proof---that our algorithm will always maximize the intersection of the species in the phylogeny and the dataset without inducing any splits that do not occur in the guide topology (whether a topotree or taxonomy).
+All nodes (including tips) can be \emph{complete} or \emph{incomplete}; incomplete nodes are nodes that do not include data that maps \emph{directly} to a species in the chronogram, while complete nodes do.  This is because we don't swap out species that have trait data, even if they are swappable (we are not trying to generate \emph{all possible} sets of mappings, but simply use as much trait data as possible; see below for further comment on this point).
 
-ADD DESCRIPTION HERE
+All nodes (including tips) have a \emph{candidate set} of possible tips; these are species with trait data that can go with a given tip.  We store these at nodes where we might prune the tree down to that node.
 
-\subsection{Using a complete topology}
-
-OpenTree synthesis tree
+\begin{enumerate}
+\item Drop all species from the chronogram that are not in either the data or in the topological tree as these tips are not saveable.
+\item Drop species from the topological tree that are not in the data or the chronogram as they are not informative.
+\item Flag all tips that have trait data as \emph{complete}, and all other tips and nodes as \emph{incomplete}.
+\item Initialise a \emph{candidate set} for each tip and internal node;
+  \begin{enumerate}
+  \item for tips that have data, the candidate set is the species name
+  \item for tips without data, the candidate set is the clade within the topo tree that includes the tip and does not include any other species in the chronogram
+  \end{enumerate}
+\item In post-order traversal, for each node:
+\begin{enumerate}
+  \item if any descendant tip/node is complete then this node is complete; the candidate set remains empty.
+  \item otherwise:
+\begin{enumerate}
+    \item compute the descendants of this node within the chronogram
+    \item compute the most recent common ancestor (MRCA) of these descendants in the topo tree
+    \item compute the descendants of that node within the topo tree
+    \item if any topo descendant is complete, label this node complete
+    \item otherwise grow the candidate set to include the descendant nodes candidate set, and then clear the descendant node candidate sets.
+\end{enumerate}
+  \item This process leaves all species that can be used (are in the union of the chronogram and the data set) in exactly one candidate set, and every node will be complete.
+\end{enumerate}
+\item Drop all tips with an empty candidate set
+\end{enumerate}
 
 \subsection{Using a taxonomic resource}
 
-It may be more commonly the case that a taxonomic resource is available for some group. It is important to recognize that a taxonomy is in practice (if not in theory), a phylogenetic hypothesis that only contains nodes at named places on the tree. Thus our approach works just as well for this case.
+It may be more commonly the case that a taxonomic resource is available for some group. Numerous taxonomic resources are available on the web (cite, cite) and tools, such as the R package \textsc{taxize} \citep{taxize}, make it possible to interact with them from within R. For the specific examples in this project we also built a tool that dynamically builds a genus-family-order lookup for vascular plants from three canonical sources---\textsc{The Plant List} \citep{ThePlantList}, \textsc{APWeb} \citep{apweb}, and a recently published higher taxa lookup table \citep[][compiled by D.C. Tank, J.M. Eastman, J.M. Beaulieu, W.K. Cornwell, P.F. Stevens, and A.E. Zanne]{ZanneDryad,Zanne}.  This will keep the taxonomy resource up-to-date as systematic information improves through time.  It is freely available as the \textsc{TaxonLookup} R package at CRAN and at \url{https://github.com/wcornwell/TaxonLookup}; currently only vascular plants are covered by this resource, but it could be extended to cover other taxa. 
 
-It is important to be explicit about what assumptions we are making when we use a taxonomy as a guide. We are not assuming that every named higher taxonomic group is necessarily monophyletic; rather \emph{we assume that a higher taxonomic unit is monophyletic if and only if there is no phylogenetic evidence to contradict this claim}.  
+For the taxonomic case, the \textsc{phyndr} algorithm works as follows:
 
-To make this assessment new tools can be made including \textsc{opentree} synthetic tree \citep{OpenTree}.  For the specific examples in this project we also built a tool that dynamically builds a genus-family-order lookup for vascular plants from three canonical sources--the plant list, ApWeb, and Tank et al. higher taxa lookup.  This will keep the taxonomy resource up-to-date as systematic information improves through time.  It is freely available as the \textsc{TaxonLookup} R package at CRAN and at https://github.com/wcornwell/TaxonLookup ; currently only vascular plants are covered by this resource, but it could be extended to cover other taxa.  
+Start with a table of taxonomic information; row names are the tip labels in the tree; each column is an increasing taxonomic level (e.g., genus, family, order) that are perfectly nested.  Let a \emph{group} be all species at an instance of a taxonomic level (may or may not be a clade)
 
-Use \textsc{taxize} \citep{taxize}
+For each taxonomic level in decreasing order:
+\begin{enumerate}
+  \item Match species in the tree to the data; these species are fixed
+  \item Drop all species that are in the same \emph{group} as species that have data but which do not have trait data.
+  \item For each \emph{group} without data, identify if they are monophyletic (i.e., the species in the group form a clade to the exclusion of all other species in the tree)
+  \item If the \emph{group} contains at least one member with data:
+    \begin{enumerate}
+    \item If the \emph{group} is monophyletic collapse into a single tip
+    \item Otherwise, determine if the group can be \emph{made} monophyletic by dropping other groups that do not have data and if so drop those groups and collapse the focal group
+    \end{enumerate}
+  \item Otherwise (groups with no data), and if the group survived being dropped above:
+    \begin{enumerate}
+    \item if the group is monophyletic, collapse into a single tip
+    \item otherwise leave it alone
+    \end{enumerate}
+\end{enumerate}
+
+It is important to be explicit about what assumptions we are making when we use a taxonomy as a guide. We are not assuming that every named higher taxonomic group is necessarily monophyletic; rather \emph{we assume that a higher taxonomic unit is monophyletic if and only if there is no phylogenetic evidence to contradict this claim}. We argue that this is a rather weak assumption as is likely to be reasonable in many, but not all, cases. 
 
 \subsection{Notes on the algorithm}
 
 A number of points are worth considering when applying our algorithm to match phylogenetic and comparative datasets. First, the algorithm does not generate all possible label swaps: for lineages that occur in both the tree and the trait data, we do not consider relabelings that exclude the matched species from the final data. If the split $(\mathcal{A,B})$ exists in the guide (whether topotree or taxonomy) and both taxa $\mathcal{A}$ and $\mathcal{B}$ occur in our data set, but only $\mathcal{A}$ is in the chronogram, it would be consistent with our algorithm to swap $\mathcal{B}$ in for $\mathcal{A}$. However, we have decide to prevent this because it requires making an additional assumption without any gain in information content. (We also note that allowing such swaps would require a more complex algorithm that the one we have proposed.) 
 
-Second, we emphasize that while running analyses across multiple permutations of the datasets may be interesting and useful, this does not account for any uncertainty in topology or branch lengths and can therefore not be considered a ``posterior distribution'' or even a ``pseudo-posterior distribution'' \citep[\emph{sensu}][]{ThomasPastis, Rabosky2015}; for model-based comparative methods, it is better to consider alternative taxa sets as different realizations of the same process. 
+Second, while running analyses across multiple permutations of the datasets may be interesting and useful, this does not account for any uncertainty in topology or branch lengths and can therefore not be considered a ``posterior distribution'' or even a ``pseudo-posterior distribution'' \citep[\emph{sensu}][]{ThomasPastis, Rabosky2015}; for model-based comparative methods, it is better to consider alternative taxa sets as different realizations of the same process. 
 
-And third, we note that our algorithm is restricted to ultrametic phylogenies; taxa are only exchangeable if they are equidistant from their most recent common ancestor, a condition that is only necessarily met when all taxa are sampled contemporaneously \citep[see][for more discussion of this point and its implications for models of trait evolution]{SlaterMEE}. So while phylogenetic approaches are becoming increasingly important for analyzing fossil and epidemiological data, alternative strategies will need to be deployed for these cases.
+Third, our algorithm is restricted to ultrametic phylogenies; taxa are only exchangeable if they are equidistant from their most recent common ancestor, a condition that is only necessarily met when all taxa are sampled contemporaneously \citep[see][for more discussion of this point and its implications for models of trait evolution]{SlaterMEE}. So while phylogenetic approaches are becoming increasingly important for analyzing fossil and epidemiological data, alternative strategies will need to be deployed for these cases.
 
-\section{phyndr R package}
+And last, we note that for some data sets, no label exchanges may be permissable and the \textsc{phyndr} algorithm will return the original data. The opportunity for exchanging labels will be greatest when the tree is sampled representatively---that is when major clades in either the topological tree or taxonomy are represented by a single lineage in the chronogram.
 
-We have implemented our algorithm in a new R package \textsc{phyndr}. It can be downloaded from the CRAN repository (\url{http://cran.r-project.org/web/packages/phyndr/index.html}) and the development version is available on GitHub (\url{https://github.com/richfitz/phyndr}). \textsc{phyndr} relies on the \textsc{ape} \citep{ape} tree structure and \textsc{diversitree} \citep{FitzJohn2012} tree manipulation functions. \textsc{phyndr} contains two primary functions \texttt{phyndr\_taxonomy} and \texttt{phyndr\_topology} which use, as guides, taxonomies and topotrees, respectively. 
-
-Can generate all possible combinations
-
-
-\section{Examples}
-
-We use a recently published phylogeny of green plants from \citet{Ruhfel2014}.
-
-\section{Caveats}
+\subsection{Caveats}
 
 There are two noteworthy caveats of our approach. First, as stated above, we assume that the supplied guide topology or taxonomy is accurate when it does not conflict with the topology of the chronogram. Put another way, we do not assume that higher taxonomic units are monophyletic if there is any evidence to the contrary. Nonetheless, there may be situations in which even this assumption is violated, especially if the hypothesized topology or taxonomy is highly unstable. 
 
 Second, our approach may not be ideal when testing for trait-dependent diversification \citep[e.g.,][]{Maddison2007, FitzJohn2012}. Dropping tips without any data, which is a step of the \textsc{phyndr} algorithm, will tend to push the terminal nodes rootwards and thus bias estimation of diversification rates. (Essentially, this is similar to biases introduced by ``representative'' sampling, in which phylogenies are built using representatives of major taxonomic groups; see \citealt{Hohna2011} and \citealt{Stadler2013} for more on this point.) An alternative strategy to swapping labels would be to include all taxa in the phylogeny and assign unknown trait values to species without data \citep{FitzJohn2009}, though the relative merits of including the maximum number of species versus the maximum number of known trait values has not been characterized.
 
+
+\section{phyndr R package}
+
+We have implemented our algorithm in a new R package \textsc{phyndr}. It can be downloaded from the CRAN repository (\url{http://cran.r-project.org/web/packages/phyndr/index.html}) and the development version is available on GitHub (\url{https://github.com/richfitz/phyndr}). \textsc{phyndr} relies on the \textsc{ape} \citep{ape} tree structure and \textsc{diversitree} \citep{FitzJohn2012} tree manipulation functions. \textsc{phyndr} contains two primary functions \texttt{phyndr\_topology}, and \texttt{phyndr\_taxonomy} that use topological trees and taxonomies, respectively, as guides. (Generic names can be stripped from taxon labels and used to create a genus-only taxonomy with the function \texttt{phyndr\_genus}). 
+
+The \texttt{phyndr\_x} functions generate a \texttt{ape::phylo} objects with the taxon names relabeled where possible. If multiple relabelings for a given taxa are permissable, one is randomly selected by default but the others are stored in the returned object so that users can generate sets of trees that match to different subsets of the trait data. (Given the combinatorial nature of the problem, the number of potential relabelings can grow rather quickly and returning the full set may not be possible in R.)  
+
+\section{Examples}
+
+We use a recently published time-calibrated phylogeny of vascular plants from \citet{Magallon2015}. 
+
 \section{Closing remarks}
 
 In recent years, there have been increasing coordination and assemble of different species-level data types including observations, traits, genes, and phylogenies \citep{Parr2012}.  These data sources, while already large and growing, do not overlap completely and are unlikely to do so for the foreseeable future.  As such, any type of synthetic research involving two data sources have a matching problem, and this matching problem will be increasingly common moving into the future.  We sought to find a method that increases overlap while not introducing a new source of error.  On one level, our method is rather obvious. If one is willing to assume that when a node it is present in both the chronogram and a topological or taxonomic hypothesis, then it can be taken as correct---and indeed, if we are not willing to make such an assumption, the phylogenetic comparative approach seems rather dubious.  Our method also follows from a basic property of ultrametric trees: at any node, the labels of the daughter clades are interchangeable. However, for large, complex topologies with varying degrees of conflict, it is challenging to reason through all permissible label swaps. And even for relatively simple scenarios, automating the process is non-trivial. We believe that \textsc{phyndr} will enable empirical biologists to efficiently and reliably make the most of their data.
 
-A generalised comparative methods workflow consists of:  1) a match of exact names 2) match misspelled and outdated names 3) substitute close relatives, 4) substitute wherever you can without introducing error 5) chop out tips missing data, 6) do analysis.  In recent years the tools for some of these steps have improved.  Step (2) is much easier with TAXIZE \citep{taxize} and other tools.  Building on open datasets from TPL, APWeb, and \citet{OpenTree} our tool is aimed to facilitate steps (3) and (4).  It may increase the overlap of traits and phylogenies to differing extents in different situations, but we think that it should be applicable within many different comparative methods workflows.
-
-
-%Suggests a new use case for the \textsc{opentree} synthetic tree \citep{OpenTree} and for a renewed interest in taxonomy (worth noting the value of a phylogeny-based taxonomy).
-
-%% Not sure where this fits in -- maybe just dump
-% Our approach is not an alternative to various data imputation approaches but a compliment to them. While there are various potential problems with all of the types of data imputation and these should be used with great diligence, we see no reason that the simple taxon exchanges we propose should not be made unless the guide tree or topology is thought to be suspect.
+A generalised comparative methods workflow consists of:  1) a match of exact names 2) match misspelled and outdated names 3) substitute close relatives, 4) substitute wherever you can without introducing error 5) chop out tips missing data, 6) do analysis.  In recent years the tools for some of these steps have improved.  Step (2) is much easier with \textsc{taxize} \citep{taxize} and other tools.  Building on open datasets from \textsc{The Plant List} \citep{ThePlantList}, \textsc{APWeb} \citep{apweb}, and \textsc{OpenTree of Life} \citet{OpenTree} our tool is aimed to facilitate steps (3) and (4).  It may increase the overlap of traits and phylogenies to differing extents in different situations, but we think that it should be applicable within many different comparative methods workflows.
 
 \section{Acknowledgements}
 We thank the members of the Tempo and Mode of Plant Trait
@@ -146,8 +182,6 @@ Evolution working group for stimulating discussions of this problem. This work w
 (NESCent), NSF \#EF- 0905606, Macquarie University Genes to Geoscience
 Research Centre through the working group. MWP was supported by a NSERC postgraduate fellowship.
 
-
-Our approach is not an alternative to various data imputation approaches but a compliment to them. While there are various potential problems with all of the types of data imputation and these should be used with great diligence, we see no reason that the simple taxon exchanges we propose should not be made unless the guide tree or topology is thought to be suspect.
 
 \clearpage
 
