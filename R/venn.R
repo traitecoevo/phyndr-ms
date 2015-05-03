@@ -1,11 +1,11 @@
 venn <- function() {
   cols <- venn_cols()
 
-  spp <- list(diversity = 350000,
-              accepted  = 320000,
-              genbank   = 92000,
-              traits    = 49000,
-              overlap   = 26000)
+  spp <- list(diversity = 350000, # Will's estimate
+              accepted  = 312069, # From TaxonLookup
+              genbank   = 92704,  # Scrubbed genbank
+              traits    = 40159,  # Zanne et al
+              overlap   = 28868)
 
   border <- 0.025
   grid.newpage()
