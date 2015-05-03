@@ -99,6 +99,8 @@ It may be more commonly the case that a taxonomic resource is available for some
 
 It is important to be explicit about what assumptions we are making when we use a taxonomy as a guide. We are not assuming that every named higher taxonomic group is necessarily monophyletic; rather \emph{we assume that a higher taxonomic unit is monophyletic if and only if there is no phylogenetic evidence to contradict this claim}.  
 
+To make this assessment new tools can be made including \textsc{opentree} synthetic tree \citep{OpenTree}.  For the specific examples in this project we also built a tool that dynamically builds a genus-family-order lookup for vascular plants from three canonical sources--the plant list, ApWeb, and Tank et al. higher taxa lookup.  This will keep the taxonomy resource up-to-date as systematic information improves through time.  It is freely available as the \textsc{TaxonLookup} R package at CRAN and at https://github.com/wcornwell/TaxonLookup ; currently only vascular plants are covered by this resource, but it could be extended to cover other taxa.  
+
 Use \textsc{taxize} \citep{taxize}
 
 \subsection{Notes on the algorithm}
@@ -130,10 +132,10 @@ Second, our approach may not be ideal when testing for trait-dependent diversifi
 
 In recent years, there have been increasing coordination and assemble of different species-level data types including observations, traits, genes, and phylogenies \citep{Parr2012}.  These data sources, while already large and growing, do not overlap completely and are unlikely to do so for the foreseeable future.  As such, any type of synthetic research involving two data sources have a matching problem, and this matching problem will be increasingly common moving into the future.  We sought to find a method that increases overlap while not introducing a new source of error.  On one level, our method is rather obvious. If one is willing to assume that when a node it is present in both the chronogram and a topological or taxonomic hypothesis, then it can be taken as correct---and indeed, if we are not willing to make such an assumption, the phylogenetic comparative approach seems rather dubious.  Our method also follows from a basic property of ultrametric trees: at any node, the labels of the daughter clades are interchangeable. However, for large, complex topologies with varying degrees of conflict, it is challenging to reason through all permissible label swaps. And even for relatively simple scenarios, automating the process is non-trivial. We believe that \textsc{phyndr} will enable empirical biologists to efficiently and reliably make the most of their data.
 
-%% Think we should have a paragraph here about what such a workflow might look like 
-Suggests a new use case for the \textsc{opentree} synthetic tree \citep{OpenTree} and for a renewed interest in taxonomy (worth noting the value of a phylogeny-based taxonomy).
+A generalised comparative methods workflow consists of:  1) a match of exact names 2) match misspelled and outdated names 3) substitute close relatives, 4) substitute wherever you can without introducing error 5) chop out tips missing data, 6) do analysis.  In recent years the tools for some of these steps have improved.  Step (2) is much easier with TAXIZE \citep{taxize} and other tools.  Building on open datasets from TPL, APWeb, and \citet{OpenTree} our tool is aimed to facilitate steps (3) and (4).  It may increase the overlap of traits and phylogenies to differing extents in different situations, but we think that it should be applicable within many different comparative methods workflows.
 
 
+%Suggests a new use case for the \textsc{opentree} synthetic tree \citep{OpenTree} and for a renewed interest in taxonomy (worth noting the value of a phylogeny-based taxonomy).
 
 %% Not sure where this fits in -- maybe just dump
 % Our approach is not an alternative to various data imputation approaches but a compliment to them. While there are various potential problems with all of the types of data imputation and these should be used with great diligence, we see no reason that the simple taxon exchanges we propose should not be made unless the guide tree or topology is thought to be suspect.
@@ -144,7 +146,11 @@ Evolution working group for stimulating discussions of this problem. This work w
 (NESCent), NSF \#EF- 0905606, Macquarie University Genes to Geoscience
 Research Centre through the working group. MWP was supported by a NSERC postgraduate fellowship.
 
+
+Our approach is not an alternative to various data imputation approaches but a compliment to them. While there are various potential problems with all of the types of data imputation and these should be used with great diligence, we see no reason that the simple taxon exchanges we propose should not be made unless the guide tree or topology is thought to be suspect.
+
 \clearpage
+
 \bibliographystyle{jecol}
 \bibliography{phyndr.bib}
 
