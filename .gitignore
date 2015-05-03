@@ -39,3 +39,6 @@ vignettes/*.pdf
 *.out
 *.synctex.gz
 ms/phyndr-ms.pdf
+.remake
+ignore
+ms/figs

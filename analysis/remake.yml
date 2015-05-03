@@ -1,8 +1,0 @@
-sources: remake
-
-packages:
-  - ape
-  - diversitree
-  - phyndr
-  - sowsear
-  - markdown
