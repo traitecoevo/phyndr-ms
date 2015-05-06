@@ -62,8 +62,8 @@
 \definecolor{navy}{rgb}{0,0,0.4}
 
 % \iffinal
-\newcommand{\email}[1]{\texttt{#1}}
-\newcommand{\url}[1]{\texttt{#1}}
+%\newcommand{\email}[1]{\texttt{#1}}
+%\newcommand{\url}[1]{\texttt{#1}}
 % \else
 % \usepackage[colorlinks,citecolor=navy,linkcolor=navy,urlcolor=navy]{hyperref}
 % \newcommand{\email}[1]{\href{mailto:#1}{\texttt{#1}}}
@@ -148,3 +148,9 @@ Titles for Systematic biology:
 
 \usepackage{setspace}
 %\newcommand{\textspacing}{\setstretch{1.45}}
+
+%% Add hyperrefs
+\usepackage{color}
+\definecolor{navy}{rgb}{0,0,0.4}
+\usepackage[colorlinks,citecolor=navy,linkcolor=navy,urlcolor=navy]{hyperref}
+\usepackage{breakurl}
