@@ -15,4 +15,4 @@ devtools::install_github("richfitz/remake")
 remake::make()
 ```
 
-This project is a collaboration between [Matthew Pennell](mwpennell.com), [Rich FitzJohn](http://richfitz.github.io/), and [Will Cornwell](http://willcornwell.org/). 
+This project is a collaboration between [Matthew Pennell](www.mwpennell.com), [Rich FitzJohn](http://richfitz.github.io/), and [Will Cornwell](http://willcornwell.org/). 
