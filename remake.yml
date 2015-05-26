@@ -8,13 +8,41 @@ packages:
   - phyndr
   - sowsear
   - markdown
+  - TaxonLookup
 
 targets:
   all:
     depends:
       - ms/figs/venn.pdf
+      - ms/figs/emp_egs.pdf
   ms/figs/venn.pdf:
     command: venn()
     plot:
       width: 6
       height: 4
+  source_data/magallon_tree.nex:
+    download: http://datadryad.org/bitstream/handle/10255/dryad.76144/Magallon_etal_PL_ML.nex?sequence=1
+  magallon_tree:
+    command: load_magallon_tree("source_data/magallon_tree.nex")
+  magallon_tree_modified:
+    command: clean_magallon_tiplabel(magallon_tree)
+  source_data/zae_tree.zip:
+    download: http://datadryad.org/bitstream/handle/10255/dryad.55548/PhylogeneticResources.zip?sequence=1
+  zae_tree:
+    command: load_zae_tree("source_data/zae_tree.zip")
+  source_data/woody_data.csv:
+    download: http://datadryad.org/bitstream/handle/10255/dryad.59002/GlobalWoodinessDatabase.csv?sequence=1
+  woody_data:
+    command: load_woody_data("source_data/woody_data.csv")
+  phyndr_magallon:
+    command: phyndr_taxonomy_wrap(magallon_tree_modified, woody_data)
+  phyndr_zae: 
+    command: phyndr_taxonomy_wrap(zae_tree, woody_data)
+  ms/figs/emp_egs.pdf:
+    command: fig_trees(phyndr_magallon, phyndr_zae)
+    plot:
+      width: 9
+      height: 5
+
+  
+
