@@ -8,18 +8,25 @@ packages:
   - phyndr
   - sowsear
   - markdown
-  - TaxonLookup
+  - taxonlookup
 
 targets:
   all:
     depends:
+      - ms/phyndr-ms.pdf
+  ms/phyndr-ms.pdf:
+    command: latex_build("ms/phyndr-ms.tex", "ms/phyndr.bib", clean=TRUE)
+    depends:
       - ms/figs/venn.pdf
       - ms/figs/emp_egs.pdf
+      - ms/numbers.tex
+
   ms/figs/venn.pdf:
     command: venn()
     plot:
       width: 6
       height: 4
+
   source_data/magallon_tree.nex:
     download: http://datadryad.org/bitstream/handle/10255/dryad.76144/Magallon_etal_PL_ML.nex?sequence=1
   magallon_tree:

@@ -5,3 +5,7 @@ sowsear:
 phyndr:
   source: github
   repo: richfitz/phyndr
+
+taxonlookup:
+  source: github
+  repo: wcornwell/taxonlookup

@@ -12,6 +12,7 @@ The analyses contained in the paper can be reproduced using the [remake](https:/
 devtools::install_github("richfitz/remake")
 
 ## Re-run the analysis with remake
+remake::install_missing_packages()
 remake::make()
 ```
 
