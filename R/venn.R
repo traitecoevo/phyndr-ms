@@ -26,9 +26,9 @@ venn <- function() {
   target <- spp$overlap / spp$genbank * pi * r_g^2
   d <- uniroot(function(x) lens_area(x, r_g, r_t) - target, c(0.1, 0.3))$root
 
-  x_g <- 0.4
+  x_g <- 0.5
   y <- 0.6
-  theta <- 40
+  theta <- 70
 
   vp_venn <- viewport(angle=theta)
   pushViewport(vp_venn)
@@ -49,15 +49,21 @@ venn <- function() {
 
   lab <- c("Total diversity",
            "Accepted names",
-           "Trait data",
+           "Genetic data",
            "Overlap",
-           "Genetic data")
+           "Trait data")
 
   lab_y <- seq(0, 1, length.out=length(lab) + 2)
   lab_y <- lab_y[-c(1, length(lab_y))]
   lab_x <- unit(1, "npc") - unit(border, "snpc")
 
   grid.text(lab, lab_x, lab_y, just="right")
+
+  x0 <- rep(lab_x, 5) -
+    unit(1, "strwidth", data=as.list(lab)) - unit(.5, "char")
+  x1 <- unit(c(0.55, 0.6, 0.4, 0.2, 0.3), "npc")
+  grid.segments(x0, lab_y, x1, lab_y,
+                gp=gpar(col=unlist(cols[c(1, 2, 3, 5, 4)]), lwd=2))
 }
 
 venn_cols <- function() {
