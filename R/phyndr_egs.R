@@ -8,18 +8,18 @@ phyndr_taxonomy_wrap <- function(tree, dat){
 
 
 fig_trees <- function(res_1, res_2){
-    cols <- tree_cols()
     par(mfrow=c(1,2))
-    fig_tree_single(res_1, cols)
-    fig_tree_single(res_2, cols)
+    fig_tree_single(res_1)
+    fig_tree_single(res_2)
 }
 
 tree_cols <- function(){
     cols_flatui <- flatui_colour_scheme()
-    list(swap = c(cols_flatui$blue,cols_flatui$orange))
+    list(swap = c(cols_flatui$blue,cols_flatui$yellow))
 }
 
-fig_tree_single <- function(res, cols){
+fig_tree_single <- function(res){
+    cols <- tree_cols()
     old <- res$old_tree
     new <- res$new_tree
     idx  <- which(new$tip.label %in% old$tip.label) 

@@ -19,6 +19,7 @@ targets:
     depends:
       - ms/figs/venn.pdf
       - ms/figs/emp_egs.pdf
+      - ms/figs/phyndr-eg-magallon.pdf
       - ms/numbers.tex
 
   ms/figs/venn.pdf:
@@ -50,6 +51,11 @@ targets:
     plot:
       width: 9
       height: 5
+  ms/figs/phyndr-eg-magallon.pdf:
+    command: fig_tree_single(phyndr_magallon)
+    plot:
+      width: 6
+      height: 6
 
   
 
