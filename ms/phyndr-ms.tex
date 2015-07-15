@@ -48,7 +48,7 @@ $^{*}$ Email for correspondence: \texttt{mwpennell@gmail.com}\\
 \addtolength{\parskip}{.3em}
 \vfill
 
-\singlespacing
+\doublespacing
 \section{Summary}
 \begin{enumerate}
 % RGF: abstract too long (currently ~300 words, aim for 250)
@@ -202,7 +202,7 @@ This gives us a comparative data set including 769 species; we have recovered a 
 
 In recent years, there have been increasing coordination to assemble different species-level data types including observations, traits, genes, and phylogenies \citep{Parr2012}.  These data sources, while already large and growing, do not overlap completely, and are unlikely to do so for the foreseeable future.  As such, any type of synthetic research involving two data sources have a matching problem, and this matching problem will be increasingly common moving into the future.  We sought to find a method that maximizes overlap while not introducing a new source of error.  
 
-On one level, our method is rather obvious. Simpler versions of the same concept (based on genera only) have been implemented in previous software packages \citep[e.g.,][]{pearse2013phylogenerator}.  If one is willing to assume that when a node it is present in both the chronogram and a topological or taxonomic hypothesis it can be taken as correct, our method follows from a basic property of ultrametric trees: at any node, the labels of the daughter clades are interchangeable. However, for large, complex topologies with varying degrees of conflict, it is challenging to reason through all permissible label swaps. And even for relatively simple scenarios, automating the process is non-trivial. We believe that {\phyndr} will enable empirical biologists to efficiently and reliably make the most of their data.
+On one level, our method is rather obvious. Simpler versions of the same concept (based on genera only) have been implemented in previous software packages \citep[e.g., \textsc{phyloGenerator};][]{pearse2013phylogenerator}.  If one is willing to assume that when a node it is present in both the chronogram and a topological or taxonomic hypothesis it can be taken as correct, our method follows from a basic property of ultrametric trees: at any node, the labels of the daughter clades are interchangeable. However, for large, complex topologies with varying degrees of conflict, it is challenging to reason through all permissible label swaps. And even for relatively simple scenarios, automating the process is non-trivial. We believe that {\phyndr} will enable empirical biologists to efficiently and reliably make the most of their data.
 
 A generalised comparative methods workflow consists of the following steps:  1) match exact names; 2) match misspelled and outdated names; 3) substitute close relatives; 4) substitute wherever you can without introducing error; 5) prune the tips with missing data; 6) do analysis.  In recent years the tools for some of these steps have improved.  For example, step (2) might involve using \textsc{taxize} \citep{taxize}, \textsc{Taxonstand} \citep{cayuela2012} and other tools.
 %
