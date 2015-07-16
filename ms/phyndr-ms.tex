@@ -185,7 +185,7 @@ We can get the entire taxonomy table from {\taxonlookup} using \texttt{plant\_lo
 \texttt{library(taxonlookup)}\\
 \texttt{tax\_all <- plant\_lookup()}\\
 \bigskip
-But for our algorithm, we only need taxonomy for all species in tree and data, which can be obtained with the function \texttt{taxonlookup::plant\_lookup}:\\
+But for our algorithm, we only need taxonomy for all species in tree and data, which can be obtained with the function \texttt{taxonlookup::lookup\_table}:\\
 \texttt{spp <- unique(c(phy\$tip.label, rownames(dat))}\\
 \texttt{tax\_spp <- lookup\_table(spp, by\_species=TRUE)}\\
 \texttt{tax\_spp <- tax\_spp[,c(``genus'', ``family'', ``order'')]}\\
