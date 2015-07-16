@@ -1,6 +1,6 @@
-## phyndr: a simple approach for maximizing the intersection of phylogenetic and comparative data
+## A simple approach for maximizing the overlap of phylogenetic and comparative data
 
-This repo contains tex files for our manuscript and R code to reproduce all example analyses. The paper describes two packages [phyndr](https://github.com/richfitz/phyndr) and [TaxonLookup](https://github.com/wcornwell/TaxonLookup) (the source code for the packages are in their own repos; links above).
+This repo contains tex files for our manuscript and R code to reproduce all example analyses. The paper describes two packages [phyndr](https://github.com/richfitz/phyndr) and [taxonlookup](https://github.com/wcornwell/taxonlookup) (the source code for the packages are in their own repos; links above).
 
 The analyses contained in the paper can be reproduced using the [remake](https://github.com/richfitz/remake) R package.
 
