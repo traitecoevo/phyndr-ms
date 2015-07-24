@@ -136,9 +136,36 @@ mamm_phyndr_genus
 
 ## ## Using a topology with phyndr
 
+## If we assume that taxonomies reflect evolutionary relationships (which they should!), then it is fair to consider a taxonomic table as a way of representing a phylogenetic tree, albeit a very unresolved one, with polytomies at each named level. Indeed, using `taxize` it is possible to construct a tree from the a classification scheme
+mamm_class_tree <- class2tree(cls)
+mamm_class_tree
+
+## If we have some more detailed information on evolutionary relationships, we could then leverage this in the same way that we did taxonomies (though the algorithm is slightly different; see manuscript text for details). However, we still want to use the tree we have built for the purposes of our analyses presumably because it is more reliable or robust than previous topological hypotheses.
+
 ## ### With a supplied topology
 
-## ### With the OpenTree of Life API
+## The phylogeny used in [Zanne et al.](http://www.nature.com/nature/journal/v506/n7486/abs/nature12872.html) was much larger the Magallon phylogeny but was constructed using far fewer genes. In this case, we might want to use the Magallon tree for our analysis and the Zanne tree to inform our swaps.
+
+## Load the Zanne tree into the workspace
+zae_phy <- make("zanne_tree")
+
+## And use the function `phyndr_topology`
+mag_zae_phyndr <-  phyndr_topology(mag_phy, wood_dat, zae_phy)
+mag_zae_phyndr
+
+## ### With the Open Tree of Life API
+
+## Alternatively, we could query the OpenTree of Life API to obtain the best synthetic tree for our group. This tree will represent a synthesis of a variety of studies and, perhaps, taxonomy where phylogenetic information is lacking. It is therefore an ideal place to get a topological hypothesis for phyndr but in some cases, may not be idea for analyzing comparative data with. This is simply a small example to inspire you to explore further and we point you to the `rotl` [documentation](https://github.com/ropensci/rotl) for more information and ideas.
+
+## Let's go back to the mammal example. Given our list of species, we need to first use Open Tree's Taxonomic Name Resolution Service to generate a set of reference IDs
+otl_names <- tnrs_match_names(mamm_spp)
+
+## Then we can use these ID's to query the Open Tree API for the synthetic tree including these taxa
+mamm_otl_phy <- tol_induced_subtree(ott_ids=otl_names$ott_id)
+
+## And then, as with the plant example above, use the topology to inform our swaps
+mamm_otl_phyndr <- phyndr_topology(mamm_phy, mamm_bmr, mamm_otl_phy)
+mamm_otl_phyndr
 
 ## ## Additional features of taxonlookup
 
