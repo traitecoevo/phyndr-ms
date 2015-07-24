@@ -64,7 +64,7 @@ head(tax_2)
 ## Let's subset the taxonomy so we only consider the genus, family and order columns
 tax <- tax[,c("genus", "family", "order")] 
 
-## To run the phyndr algorithm, you need to supply the chronogram, the trait data with rownames set to species names, and the taxonomic table. Since we are using the taxonomic version of the algorithm, we use `phyndr_taxonomy`
+## To run the phyndr algorithm, we need to supply the chronogram, the trait data with rownames set to species names, and the taxonomic table. Since we are using the taxonomic version of the algorithm, we use `phyndr_taxonomy`
 mag_phyndr <- phyndr_taxonomy(mag_phy, wood_dat, tax)
 
 ## The returned object in `mag_phyndr`
@@ -74,9 +74,65 @@ str(mag_phyndr)
 
 ## ### With a supplied taxonomy
 
-## If you don't work on land plants, or if you don't like our taxonomy (don't worry, we won't be offended),
+## The taxonomic resources in `taxonlookup` are currently only available for land plants (though hopefully we will expand its scope in the future; if you are interested in helping to curate taxonomies for other groups, we would love to work with you!). Therefore, if we want to use the taxonomic version of phyndr with some other group of organisms, we need to supply our own taxonomy from somewhere else. One convenient way to obtain a taxonomy is to query online databases. A number of packages have been developed to facilitate this. 
+
+## Here we are going to use the R interface to the [Open Tree of Life](http://opentreeoflife.org/) [API](https://github.com/OpenTreeOfLife/opentree/wiki/Open-Tree-of-Life-APIs) [rotl](https://github.com/ropensci/rotl) to obtain a tree of mammals from a study by [Meredith et al.](http://www.sciencemag.org/content/334/6055/521.short).
+
+## To use `rotl` we first need to install the following packages
+devtools::install_github("fmichonneau/rncl")
+devtools::install_github("ropensci/rotl")
+library(rotl)
+
+## To pull down the Meredith tree use the function `rotl::get_study_tree`
+mamm_phy <- get_study_tree(study_id="pg_1428", tree_id="tree2855")
+
+## And we are going to pull down a data set of basal metabolic rate for mammals
+mamm_bmr <- make("mammal-bmr-data")
+
+## To get a taxonomy for this group, we are going to the [taxize](https://github.com/ropensci/taxize) to query the [NCBI Taxonomic Database](http://www.ncbi.nlm.nih.gov/taxonomy)
+devtools::install_github("ropensci/taxize")
+library(taxize)
+
+## Get a vector of taxa that occur in either the data or the tree
+mamm_spp <- unique(c(mamm_phy$tip.label, rownames(mamm_bmr)))
+
+## Get NCBI ID numbers for all taxa
+ids <- get_uid(mamm_spp, verbose=FALSE)
+
+## Get classification info for all of these
+cls <- classification(ids)
+
+## The warnings indicate that some taxa in our data were not found in the taxonomic database. There are lots of reasons this could be the case but for now, we will be conservative and simply disallow any swaps that involve taxa for which which we cannot find taxonomic information.
+no_swap <- which(is.na(names(cls)))
+mamm_spp <- mamm_spp[-no_swap]
+cls[no_swap] <- NULL
+
+## Put the taxonomy together and select the columns of interest
+mamm_tax <- cbind(cls)
+rownames(mamm_tax) <- mamm_spp
+mamm_tax <- mamm_tax[,c("genus", "family", "order")]
+head(mamm_tax)
+
+## **Note: phyndr is dumb. It assumes that every column in your taxonomic table corresponds to a taxonomic rank and that these occur in ascending order (i.e., genus -> family -> order, etc.).**
+
+## Now we can use `phyndr_taxonomy` just as before
+mamm_phyndr <- phyndr_taxonomy(mamm_phy, mamm_bmr, mamm_tax)
+mamm_phyndr
+
+## There are plenty of other databases to query to obtain taxonomies (see the [taxize tutorial](https://ropensci.org/tutorials/taxize_tutorial.html)) and alternative approaches to querying these. For example, one could get the mammal taxonomy directly from the tip labels using the `gbresolve` function in [geiger](https://github.com/mwpennell/geiger-v2) that is usually used as part of the [congruification approach to dating phylogenies](http://onlinelibrary.wiley.com/doi/10.1111/2041-210X.12051/abstract).
+install.packages(c("ncbit", "geiger"))
+library(geiger)
+mamm_tax <- gbresolve(mamm_phy)
+mamm_tax <- mamm_tax[,c("genus", "family", "order")]
+head(mamm_tax)
+
+## Or, it is also possible to use Open Tree's taxonomy for this...
 
 ## ### By genus name
+
+## It's even easier if we just want to restrict the swaps to species occuring in the same genus. Assuming that the tip labels and rownames of the data but are the species names in `genus_species` format, we can just skip the taxonomy curation step and use `phyndr_genus`
+mamm_phyndr_genus <- phyndr_genus(mamm_phy, mamm_bmr)
+mamm_phyndr_genus
 
 ## ## Using a topology with phyndr
 
