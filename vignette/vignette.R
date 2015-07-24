@@ -176,7 +176,7 @@ head(plant_lookup(include_counts = TRUE))
 
 ## This feature will include a column with the number of (non-hybrid) species per genus in the lookup table, which is useful for both diversity weighting in graphics and for diversification analyses.
 
-## 2. versioning
+## ### Versioning
 
 ## Because taxonomy is (and always has been) a dynamic field, the best available data will always be changing.  taxonlookup is a dynamic resource built on two other dynamic web resources:  1. [The Plant List v1.1.](http://www.theplantlist.org/) for accepted genera to families and species richness within each genera.  Note that we do not consider hybrids (e.g. Genus X species) as distinct species for this count while the plant list summary statistics do, so the the counts from this package will not line up exactly with the ones on the TPL website. And 2. [APWeb](http://www.mobot.org/MOBOT/research/APweb/) for family-level synonymies and family-to-order for all vascular plant families. Note that there is not currently order-level information available for Bryophytes.  When either of these resource changes we will release a new version of the data underlying taxonlookup.  By default these function use the most recent data.  However, for the purposes of reproducability, taxonlookup also makes it easy to access older versions.
 
