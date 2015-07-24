@@ -46,6 +46,10 @@ targets:
       width: 6
       height: 6
 
-  
-  vignette.md:
+  bmr_data:
+    command: load_bmr_data()
+  source_data/meredith_mammal.tre:
+    download: http://datadryad.org/bitstream/handle/10255/dryad.56186/Mammalia.tre?sequence=1
+  meredith_tree:
+    command: load_meredith_tree("source_data/meredith_mammal.tre")
 

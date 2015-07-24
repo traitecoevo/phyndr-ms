@@ -6,25 +6,25 @@
 ## ## Introduction
 ## We sought to address a simple (and perhaps a little mundane) but common problem in comparative analyses: a mismatch between species for which there is (phylo)genetic information and those that have been measured for some trait of interest. While a number of data imputation approaches have been suggested to get around this problem, our strategy with phyndr is much simpler: use some external information, such as a topological hypothesis or taxonomic resource, to swap out species in the tree that don't have trait data with "phylogenetically equivalent" species that do.
 
-## We have implemented the taxon swapping algorithms in the `phyndr` R package. To facilitate the use of taxonomic knowledge to make the swaps, at least in land plants, we have built a second R package `taxonlookup` that contains a curated, versioned, and dynamic taxonomic resource. `taxonlookup` is interoperable with `phyndr` but can also be used as a stand-alone tool for a wide variety of ecological and evolutionary applications. (As mentioned above, `taxonlookup` currently only contains a taxonomy of land plants, but the plumbing and infrastructure was designed to be general; if people with taxonomic expertise in other groups would be interested in contributing to this project, we would be thrilled!)
+## We have implemented the taxon swapping algorithms in the phyndr R package. To facilitate the use of taxonomic knowledge to make the swaps, at least in land plants, we have built a second R package taxonlookup that contains a curated, versioned, and dynamic taxonomic resource. taxonlookup is interoperable with phyndr but can also be used as a stand-alone tool for a wide variety of ecological and evolutionary applications. (As mentioned above, taxonlookup currently only contains a taxonomy of land plants, but the plumbing and infrastructure was designed to be general; if people with taxonomic expertise in other groups would be interested in contributing to this project, we would be thrilled!)
 
 
 ## ## Preliminaries
 ## Install and load packages
 
-## Get `remake`
+## Get remake
 ## install.packages("devtools")
 devtools::install_github("richfitz/remake")
 library(remake)
 
-## Install `phyndr`
+## Install phyndr
 devtools::install_github("richfitz/phyndr")
 library(phyndr)
 
-## N.B. `phyndr` imports `ape` but does not load it into the `NAMESPACE`. Reading, writing, and manipulating `phylo` objects requires loading in ape separately.
+## N.B. phyndr imports [ape](https://cran.r-project.org/web/packages/ape/index.html) but does not load it into the `NAMESPACE`. Reading, writing, and manipulating `phylo` objects requires loading in ape separately.
 library(ape)
 
-## Install `taxonlookup`
+## Install taxonlookup
 devtools::install_github("wcornwell/taxonlookup")
 library(taxonlookup)
 
@@ -33,68 +33,68 @@ library(taxonlookup)
 
 ## We will first load in a recent phylogenetic tree from [Magallon et al. 2015](http://onlinelibrary.wiley.com/doi/10.1111/nph.13264/abstract), which includes 798 taxa, sampled from across Angiosperms. Following the terminology of our algorithm, this is the chronogram.
 
-mag_phy <- make("magallon_tree_modified")
-mag_phy
+angio_phy <- make("magallon_tree_modified", verbose=FALSE)
+angio_phy
 
 ## For the trait data set, we will use a large data base of plant growth form (i.e., woody v. herbaceous) compiled by [Zanne et al. 2014](http://www.nature.com/nature/journal/v506/n7486/abs/nature12872.html)
 
-wood_dat <- make("woody_data")
+wood_dat <- make("woody_data", verbose=FALSE)
 head(wood_dat)
 
 ## ### With taxonlookup
 
-## `taxonlookup` is, on the surface, a very simple package. It essentially has two functions. First, `plant_lookup` loads the taxonomy into R.
+## taxonlookup is, on the surface, a very simple package. It essentially has two functions. First, `plant_lookup` loads the taxonomy into R.
 head(plant_lookup())
-## The first time this function is run, it will download and compile the latest version of the taxonomy. This may take some time, but subsequent calls (even in different R sessions) will be essentially instantaenous.
+## The first time this function is run, it will download and compile the latest version of the taxonomy. This may take some time, but subsequent calls (even in different R sessions) will be essentially instantaenous (see below). 
 
 ## The second function is `lookup_table`, which compiles a taxonomic resource for a set of species. By default this uses the taxonomy produced by `plant_lookup()` but an alternative taxonomy can be supplied to the argument `lookup_table=`.
 
 ## We want to build a taxonomic table that includes all species in the phylogenetic tree **AND** all species in the trait data. If there is no taxonomic information for some species in the data set, this is fine; it only means that no swaps involving this taxa will be permitted.
 
 ## Create a vector of taxa for the union of names in the tree and the data
-spp <- unique(c(mag_phy$tip.label, rownames(wood_dat)))
+angio_spp <- unique(c(angio_phy$tip.label, rownames(wood_dat)))
 
 ## Get a taxonomic lookup table for this vector of names
-tax <- lookup_table(spp, by_species=TRUE)
-head(tax)
-## The `by_species=TRUE` flag (which is not the default) provides a taxonomic classification for each species. This is what is needed for `phyndr`. The default `by_species=FALSE` avoids redundancies and subsets the taxonomic table by higher groups that are represented in the species list. For example,
-tax_2 <- lookup_table(spp)
-head(tax_2)
+angio_tax <- lookup_table(angio_spp, by_species=TRUE)
+head(angio_tax)
+## The `by_species=TRUE` flag (which is not the default) provides a taxonomic classification for each species. This is what is needed for the `phyndr_`. The default `by_species=FALSE` avoids redundancies and subsets the taxonomic table by higher groups that are represented in the species list. For example,
+angio_tax_alt <- lookup_table(angio_spp)
+head(angio_tax_alt)
 
 ## Let's subset the taxonomy so we only consider the genus, family and order columns
-tax <- tax[,c("genus", "family", "order")]
+angio_tax <- angio_tax[,c("genus", "family", "order")] 
 
 ## To run the phyndr algorithm, we need to supply the chronogram, the trait data with rownames set to species names, and the taxonomic table. Since we are using the taxonomic version of the algorithm, we use `phyndr_taxonomy`
-mag_phyndr <- phyndr_taxonomy(mag_phy, wood_dat, tax)
+angio_phyndr <- phyndr_taxonomy(angio_phy, rownames(wood_dat), angio_tax)
 
-## The returned object in `mag_phyndr`
-mag_phyndr
+## The returned object in `angio_phyndr`
+angio_phyndr
 ## contains a phylogenetic tree in `ape::phylo` format with additional attributes containing the permissable swaps for every taxa. The resulting tree can be of the same size or smaller than the supplied chronogram since no new splits have been induced.
-str(mag_phyndr)
+str(angio_phyndr)
 
 ## ### With a supplied taxonomy
 
-## The taxonomic resources in `taxonlookup` are currently only available for land plants (though hopefully we will expand its scope in the future; if you are interested in helping to curate taxonomies for other groups, we would love to work with you!). Therefore, if we want to use the taxonomic version of phyndr with some other group of organisms, we need to supply our own taxonomy from somewhere else. One convenient way to obtain a taxonomy is to query online databases. A number of packages have been developed to facilitate this.
+## As mentioned above, the taxonomic resources in taxonlookup are currently only available for land plants. Therefore, if we want to use the taxonomic version of phyndr with some other group of organisms (or you are working with plants and want to use an alternative taxonomy), we need to supply our own taxonomy from somewhere else. One convenient way to obtain a taxonomy is to query online databases. A number of packages have been developed to facilitate this.
 
-## Here we are going to use the R interface to the [Open Tree of Life](http://opentreeoflife.org/) [API](https://github.com/OpenTreeOfLife/opentree/wiki/Open-Tree-of-Life-APIs) [rotl](https://github.com/ropensci/rotl) to obtain a tree of mammals from a study by [Meredith et al.](http://www.sciencemag.org/content/334/6055/521.short).
+## Here we are going to use the R interface to the [Open Tree of Life](http://opentreeoflife.org/) [API](https://github.com/OpenTreeOfLife/opentree/wiki/Open-Tree-of-Life-APIs) [rotl](https://github.com/ropensci/rotl) to obtain a tree of mammals from a study by [Meredith et al. 2011](http://www.sciencemag.org/content/334/6055/521.short).
 
-## To use `rotl` we first need to install the following packages
+## To use rotl we first need to install the following packages
 devtools::install_github("fmichonneau/rncl")
 devtools::install_github("ropensci/rotl")
 library(rotl)
 
 ## To pull down the Meredith tree use the function `rotl::get_study_tree`
-mamm_phy <- get_study_tree(study_id="pg_1428", tree_id="tree2855")
+mamm_phy <- make("meredith_tree")
 
-## And we are going to pull down a data set of basal metabolic rate for mammals
-mamm_bmr <- make("mammal-bmr-data")
+## And we are going to pull down a data set of basal metabolic rate for mammals from a compilation by [McNab 2008](http://www.sciencedirect.com/science/article/pii/S1095643308007782)
+bmr_dat <- make("bmr_data")
 
 ## To get a taxonomy for this group, we are going to the [taxize](https://github.com/ropensci/taxize) to query the [NCBI Taxonomic Database](http://www.ncbi.nlm.nih.gov/taxonomy)
-devtools::install_github("ropensci/taxize")
+# devtools::install_github("ropensci/taxize")
 library(taxize)
 
 ## Get a vector of taxa that occur in either the data or the tree
-mamm_spp <- unique(c(mamm_phy$tip.label, rownames(mamm_bmr)))
+mamm_spp <- unique(c(mamm_phy$tip.label, rownames(bmr_dat)))
 
 ## Get NCBI ID numbers for all taxa
 ids <- get_uid(mamm_spp, verbose=FALSE)
@@ -116,7 +116,7 @@ head(mamm_tax)
 ## **Note: phyndr is dumb. It assumes that every column in your taxonomic table corresponds to a taxonomic rank and that these occur in ascending order (i.e., genus -> family -> order, etc.).**
 
 ## Now we can use `phyndr_taxonomy` just as before
-mamm_phyndr <- phyndr_taxonomy(mamm_phy, mamm_bmr, mamm_tax)
+mamm_phyndr <- phyndr_taxonomy(mamm_phy, rownames(bmr_dat), mamm_tax)
 mamm_phyndr
 
 ## There are plenty of other databases to query to obtain taxonomies (see the [taxize tutorial](https://ropensci.org/tutorials/taxize_tutorial.html)) and alternative approaches to querying these. For example, one could get the mammal taxonomy directly from the tip labels using the `gbresolve` function in [geiger](https://github.com/mwpennell/geiger-v2) that is usually used as part of the [congruification approach to dating phylogenies](http://onlinelibrary.wiley.com/doi/10.1111/2041-210X.12051/abstract).
@@ -126,17 +126,15 @@ mamm_tax <- gbresolve(mamm_phy)
 mamm_tax <- mamm_tax[,c("genus", "family", "order")]
 head(mamm_tax)
 
-## Or, it is also possible to use Open Tree's taxonomy for this...
-
 ## ### By genus name
 
 ## It's even easier if we just want to restrict the swaps to species occuring in the same genus. Assuming that the tip labels and rownames of the data but are the species names in `genus_species` format, we can just skip the taxonomy curation step and use `phyndr_genus`
-mamm_phyndr_genus <- phyndr_genus(mamm_phy, mamm_bmr)
+mamm_phyndr_genus <- phyndr_genus(mamm_phy, rownames(bmr_dat))
 mamm_phyndr_genus
 
 ## ## Using a topology with phyndr
 
-## If we assume that taxonomies reflect evolutionary relationships (which they should!), then it is fair to consider a taxonomic table as a way of representing a phylogenetic tree, albeit a very unresolved one, with polytomies at each named level. Indeed, using `taxize` it is possible to construct a tree from the a classification scheme
+## If we assume that taxonomies reflect evolutionary relationships (which they should!), then it is fair to consider a taxonomic table as a way of representing a phylogenetic tree, albeit a very unresolved one, with polytomies at each named level. Indeed, using taxize it is possible to construct a tree from the a classification scheme
 mamm_class_tree <- class2tree(cls)
 mamm_class_tree
 
@@ -150,12 +148,12 @@ mamm_class_tree
 zae_phy <- make("zanne_tree")
 
 ## And use the function `phyndr_topology`
-mag_zae_phyndr <-  phyndr_topology(mag_phy, wood_dat, zae_phy)
-mag_zae_phyndr
+angio_zae_phyndr <-  phyndr_topology(angio_phy, rownames(wood_dat), zae_phy)
+angio_zae_phyndr
 
 ## ### With the Open Tree of Life API
 
-## Alternatively, we could query the OpenTree of Life API to obtain the best synthetic tree for our group. This tree will represent a synthesis of a variety of studies and, perhaps, taxonomy where phylogenetic information is lacking. It is therefore an ideal place to get a topological hypothesis for phyndr but in some cases, may not be idea for analyzing comparative data with. This is simply a small example to inspire you to explore further and we point you to the `rotl` [documentation](https://github.com/ropensci/rotl) for more information and ideas.
+## Alternatively, we could query the OpenTree of Life API to obtain the best synthetic tree for our group. This tree will represent a synthesis of a variety of studies and, perhaps, taxonomy where phylogenetic information is lacking. It is therefore an ideal place to get a topological hypothesis for phyndr but in some cases, may not be idea for analyzing comparative data with. This is simply a small example to inspire you to explore further and we point you to the [rotl documentation](https://github.com/ropensci/rotl) for more information and ideas.
 
 ## Let's go back to the mammal example. Given our list of species, we need to first use Open Tree's Taxonomic Name Resolution Service to generate a set of reference IDs
 otl_names <- tnrs_match_names(mamm_spp)
@@ -164,19 +162,23 @@ otl_names <- tnrs_match_names(mamm_spp)
 mamm_otl_phy <- tol_induced_subtree(ott_ids=otl_names$ott_id)
 
 ## And then, as with the plant example above, use the topology to inform our swaps
-mamm_otl_phyndr <- phyndr_topology(mamm_phy, mamm_bmr, mamm_otl_phy)
+mamm_otl_phyndr <- phyndr_topology(mamm_phy, rownames(bmr_dat), mamm_otl_phy)
 mamm_otl_phyndr
+
 
 ## ## Additional features of taxonlookup
 
-## 1. include_counts
+## While taxonlookup is a useful companion to the phyndr package, it can also be used for a wide variety of ecological or evolutionary applications that require an up-to-date taxonomic resource. There are thus a few additional features of taxonlookup that are directly related to phyndr
+
+## ### Getting species counts
 
 head(plant_lookup(include_counts = TRUE))
+
 ## This feature will include a column with the number of (non-hybrid) species per genus in the lookup table, which is useful for both diversity weighting in graphics and for diversification analyses.
 
 ## 2. versioning
 
-## Because taxonomy is (and always has been) a dynamic field, the best available data will always be changing.  `taxonlookup` is a dynamic resource built on two other dynamic web resources:  1. [The Plant List v1.1.](http://www.theplantlist.org/) for accepted genera to families and species richness within each genera.  Note that we do not consider hybrids (e.g. Genus X species) as distinct species for this count while the plant list summary statistics do, so the the counts from this package will not line up exactly with the ones on the TPL website. And 2. [APWeb](http://www.mobot.org/MOBOT/research/APweb/) for family-level synonymies and family-to-order for all vascular plant families. Note that there is not currently order-level information available for Bryophytes.  When either of these resource changes we will release a new version of the data underlying `taxonlookup`.  By default these function use the most recent data.  However, for the purposes of reproducability, `taxonlookup` also makes it easy to access older versions.
+## Because taxonomy is (and always has been) a dynamic field, the best available data will always be changing.  taxonlookup is a dynamic resource built on two other dynamic web resources:  1. [The Plant List v1.1.](http://www.theplantlist.org/) for accepted genera to families and species richness within each genera.  Note that we do not consider hybrids (e.g. Genus X species) as distinct species for this count while the plant list summary statistics do, so the the counts from this package will not line up exactly with the ones on the TPL website. And 2. [APWeb](http://www.mobot.org/MOBOT/research/APweb/) for family-level synonymies and family-to-order for all vascular plant families. Note that there is not currently order-level information available for Bryophytes.  When either of these resource changes we will release a new version of the data underlying taxonlookup.  By default these function use the most recent data.  However, for the purposes of reproducability, taxonlookup also makes it easy to access older versions.
 
 head(plant_lookup())
 
@@ -190,3 +192,4 @@ plant_lookup_version_current()
 head(plant_lookup(version="0.2.1"))
 
 ## this will download the data from the appropriate github release, and should allow for easy access to both new and old versions and allow for easier reproducibility.
+

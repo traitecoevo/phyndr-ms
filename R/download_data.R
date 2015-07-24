@@ -26,7 +26,23 @@ load_zae_tree <- function(filename){
 load_woody_data <- function(filename){
     w <- read.csv(filename)
     rownames(w) <- gsub(" ", "_", w$gs)
-    w
+    w[,c("woodiness", "woodiness.count")]
 }
 
+load_bmr_data <- function(){
+    out <- read.csv("vignette/bmr-data.csv", row.names=1)
+    rownames(out) <- out$species
+    out[,c("mass", "bmr")]
+}
 
+load_meredith_tree <- function(filename){
+    t <- read.tree(filename)
+    
+    ## Fix up names with rotl version because species epithet missing from file
+    drop <- c("Leporidae", "Hydrochaeris", "Agouti")
+    t <- phyndr:::drop_tip(t, drop)
+    mer <- rotl::get_study_tree(study_id="pg_1428", tree_id="tree2855")
+    tmp <- sapply(t$tip.label, function(x) grep(x, mer$tip.label))
+    t$tip.label <- mer$tip.label[unlist(tmp)]
+    t
+}
