@@ -9,6 +9,9 @@ packages:
   - sowsear
   - markdown
   - taxonlookup
+  - rncl
+  - rotl
+  - taxize
 
 targets:
   all:

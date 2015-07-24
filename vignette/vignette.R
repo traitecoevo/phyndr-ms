@@ -6,28 +6,15 @@
 ## ## Introduction
 ## We sought to address a simple (and perhaps a little mundane) but common problem in comparative analyses: a mismatch between species for which there is (phylo)genetic information and those that have been measured for some trait of interest. While a number of data imputation approaches have been suggested to get around this problem, our strategy with phyndr is much simpler: use some external information, such as a topological hypothesis or taxonomic resource, to swap out species in the tree that don't have trait data with "phylogenetically equivalent" species that do.
 
-## We have implemented the taxon swapping algorithms in the phyndr R package. To facilitate the use of taxonomic knowledge to make the swaps, at least in land plants, we have built a second R package taxonlookup that contains a curated, versioned, and dynamic taxonomic resource. taxonlookup is interoperable with phyndr but can also be used as a stand-alone tool for a wide variety of ecological and evolutionary applications. (As mentioned above, taxonlookup currently only contains a taxonomy of land plants, but the plumbing and infrastructure was designed to be general; if people with taxonomic expertise in other groups would be interested in contributing to this project, we would be thrilled!)
+## We have implemented the taxon swapping algorithms in the phyndr R package. To facilitate the use of taxonomic knowledge to make the swaps, at least in land plants, we have built a second R package, taxonlookup, that contains a curated, versioned, and dynamic taxonomic resource. taxonlookup is interoperable with phyndr but can also be used as a stand-alone tool for a wide variety of ecological and evolutionary applications. (As mentioned above, taxonlookup currently only contains a taxonomy of land plants, but the plumbing and infrastructure was designed to be general; if people with taxonomic expertise in other groups would be interested in contributing to this project, we would be thrilled!)
 
 
 ## ## Preliminaries
 ## Install and load packages
-
-## Get remake
-## install.packages("devtools")
-devtools::install_github("richfitz/remake")
 library(remake)
-
-## Install phyndr
-devtools::install_github("richfitz/phyndr")
-library(phyndr)
-
-## N.B. phyndr imports [ape](https://cran.r-project.org/web/packages/ape/index.html) but does not load it into the `NAMESPACE`. Reading, writing, and manipulating `phylo` objects requires loading in ape separately.
 library(ape)
-
-## Install taxonlookup
-devtools::install_github("wcornwell/taxonlookup")
+library(phyndr)
 library(taxonlookup)
-
 
 ## ## Using a taxononmy with phyndr
 
@@ -79,8 +66,6 @@ str(angio_phyndr)
 ## Here we are going to use the R interface to the [Open Tree of Life](http://opentreeoflife.org/) [API](https://github.com/OpenTreeOfLife/opentree/wiki/Open-Tree-of-Life-APIs) [rotl](https://github.com/ropensci/rotl) to obtain a tree of mammals from a study by [Meredith et al. 2011](http://www.sciencemag.org/content/334/6055/521.short).
 
 ## To use rotl we first need to install the following packages
-devtools::install_github("fmichonneau/rncl")
-devtools::install_github("ropensci/rotl")
 library(rotl)
 
 ## To pull down the Meredith tree use the function `rotl::get_study_tree`
@@ -89,8 +74,7 @@ mamm_phy <- make("meredith_tree")
 ## And we are going to pull down a data set of basal metabolic rate for mammals from a compilation by [McNab 2008](http://www.sciencedirect.com/science/article/pii/S1095643308007782)
 bmr_dat <- make("bmr_data")
 
-## To get a taxonomy for this group, we are going to the [taxize](https://github.com/ropensci/taxize) to query the [NCBI Taxonomic Database](http://www.ncbi.nlm.nih.gov/taxonomy)
-# devtools::install_github("ropensci/taxize")
+## To get a taxonomy for this group, we are going to the [taxize](https://github.com/ropensci/taxize) to query the [NCBI Taxonomy Database](http://www.ncbi.nlm.nih.gov/taxonomy)
 library(taxize)
 
 ## Get a vector of taxa that occur in either the data or the tree
@@ -120,11 +104,6 @@ mamm_phyndr <- phyndr_taxonomy(mamm_phy, rownames(bmr_dat), mamm_tax)
 mamm_phyndr
 
 ## There are plenty of other databases to query to obtain taxonomies (see the [taxize tutorial](https://ropensci.org/tutorials/taxize_tutorial.html)) and alternative approaches to querying these. For example, one could get the mammal taxonomy directly from the tip labels using the `gbresolve` function in [geiger](https://github.com/mwpennell/geiger-v2) that is usually used as part of the [congruification approach to dating phylogenies](http://onlinelibrary.wiley.com/doi/10.1111/2041-210X.12051/abstract).
-install.packages(c("ncbit", "geiger"))
-library(geiger)
-mamm_tax <- gbresolve(mamm_phy)
-mamm_tax <- mamm_tax[,c("genus", "family", "order")]
-head(mamm_tax)
 
 ## ### By genus name
 
@@ -167,8 +146,6 @@ mamm_otl_phyndr
 
 
 ## ## Additional features of taxonlookup
-
-## While taxonlookup is a useful companion to the phyndr package, it can also be used for a wide variety of ecological or evolutionary applications that require an up-to-date taxonomic resource. There are thus a few additional features of taxonlookup that are directly related to phyndr
 
 ## ### Getting species counts
 

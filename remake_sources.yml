@@ -9,3 +9,11 @@ phyndr:
 taxonlookup:
   source: github
   repo: wcornwell/taxonlookup
+
+rncl:
+  source: github
+  repo: fmichonneau/rncl
+
+rotl:
+  source: github
+  repo: ropensci/rotl
