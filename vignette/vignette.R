@@ -62,7 +62,7 @@ tax_2 <- lookup_table(spp)
 head(tax_2)
 
 ## Let's subset the taxonomy so we only consider the genus, family and order columns
-tax <- tax[,c("genus", "family", "order")] 
+tax <- tax[,c("genus", "family", "order")]
 
 ## To run the phyndr algorithm, we need to supply the chronogram, the trait data with rownames set to species names, and the taxonomic table. Since we are using the taxonomic version of the algorithm, we use `phyndr_taxonomy`
 mag_phyndr <- phyndr_taxonomy(mag_phy, wood_dat, tax)
@@ -74,7 +74,7 @@ str(mag_phyndr)
 
 ## ### With a supplied taxonomy
 
-## The taxonomic resources in `taxonlookup` are currently only available for land plants (though hopefully we will expand its scope in the future; if you are interested in helping to curate taxonomies for other groups, we would love to work with you!). Therefore, if we want to use the taxonomic version of phyndr with some other group of organisms, we need to supply our own taxonomy from somewhere else. One convenient way to obtain a taxonomy is to query online databases. A number of packages have been developed to facilitate this. 
+## The taxonomic resources in `taxonlookup` are currently only available for land plants (though hopefully we will expand its scope in the future; if you are interested in helping to curate taxonomies for other groups, we would love to work with you!). Therefore, if we want to use the taxonomic version of phyndr with some other group of organisms, we need to supply our own taxonomy from somewhere else. One convenient way to obtain a taxonomy is to query online databases. A number of packages have been developed to facilitate this.
 
 ## Here we are going to use the R interface to the [Open Tree of Life](http://opentreeoflife.org/) [API](https://github.com/OpenTreeOfLife/opentree/wiki/Open-Tree-of-Life-APIs) [rotl](https://github.com/ropensci/rotl) to obtain a tree of mammals from a study by [Meredith et al.](http://www.sciencemag.org/content/334/6055/521.short).
 
@@ -171,5 +171,22 @@ mamm_otl_phyndr
 
 ## 1. include_counts
 
+head(plant_lookup(include_counts = TRUE))
+## This feature will include a column with the number of (non-hybrid) species per genus in the lookup table, which is useful for both diversity weighting in graphics and for diversification analyses.
+
 ## 2. versioning
 
+##Because taxonomy is (and always has been) a dynamic field, the best available data will always be changing.  `taxonlookup` is a dynamic resource built on two other dynamic web resources:  1. [The Plant List v1.1.](http://www.theplantlist.org/) for accepted genera to families and species richness within each genera.  Note that we do not consider hybrids (e.g. Genus X species) as distinct species for this count while the plant list summary statistics do, so the the counts from this package will not line up exactly with the ones on the TPL website. And 2. [APWeb](http://www.mobot.org/MOBOT/research/APweb/) for family-level synonymies and family-to-order for all vascular plant families. Note that there is not currently order-level information available for Bryophytes.  When either of these resource changes we will release a new version of the data underlying `taxonlookup`.  By default these function use the most recent data.  However, for the purposes of reproducability, `taxonlookup` also makes it easy to access older versions.
+
+head(plant_lookup())
+
+#downloads the most recent version.  You can see the version number with:
+
+pl<-plant_lookup()
+plant_lookup_version_current()
+
+# to load a previous version, simply specify it with the function `plant_lookup`
+
+head(plant_lookup(version="0.2.1"))
+
+#this will download the data from the appropriate github release, and should allow for easy access to both new and old versions and allow for easier reproducibility.
