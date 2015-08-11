@@ -29,15 +29,17 @@ load_woody_data <- function(filename){
     w[,c("woodiness", "woodiness.count")]
 }
 
-load_bmr_data <- function(){
-    out <- read.csv("vignette/bmr-data.csv", row.names=1)
-    rownames(out) <- out$species
-    out[,c("mass", "bmr")]
+bmr_dat_xlsx <- function(filename){
+  b <- read_excel(filename, skip=6)
+  rownames(b) <- sapply(b[,"Genus Species"], function(x) gsub(" ", "_", x))
+  b <- b[,c("Mass (g)", "BMR (W)")]
+  colnames(b) <- c("mass", "bmr")
+  b
 }
 
 load_meredith_tree <- function(filename){
     t <- read.tree(filename)
-    
+
     ## Fix up names with rotl version because species epithet missing from file
     drop <- c("Leporidae", "Hydrochaeris", "Agouti")
     t <- phyndr:::drop_tip(t, drop)
