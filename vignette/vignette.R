@@ -11,7 +11,6 @@
 
 ## ## Preliminaries
 ## Install and load packages
-library(remake)
 library(ape)
 library(phyndr)
 library(taxonlookup)
@@ -20,19 +19,19 @@ library(taxonlookup)
 
 ## We will first load in a recent phylogenetic tree from [Magallon et al. 2015](http://onlinelibrary.wiley.com/doi/10.1111/nph.13264/abstract), which includes 798 taxa, sampled from across Angiosperms. Following the terminology of our algorithm, this is the chronogram.
 
-angio_phy <- make("magallon_tree_modified", verbose=FALSE)
+angio_phy <- read.tree("../source_data/magallon.tre")
 angio_phy
 
 ## For the trait data set, we will use a large data base of plant growth form (i.e., woody v. herbaceous) compiled by [Zanne et al. 2014](http://www.nature.com/nature/journal/v506/n7486/abs/nature12872.html)
 
-wood_dat <- make("woody_data", verbose=FALSE)
+wood_dat <- read.csv("../source_data/wood.csv", row.names=1)
 head(wood_dat)
 
 ## ### With taxonlookup
 
 ## taxonlookup is, on the surface, a very simple package. It essentially has two functions. First, `plant_lookup` loads the taxonomy into R.
 head(plant_lookup())
-## The first time this function is run, it will download and compile the latest version of the taxonomy. This may take some time, but subsequent calls (even in different R sessions) will be essentially instantaenous (see below). 
+## The first time this function is run, it will download and compile the latest version of the taxonomy. This may take some time, but subsequent calls (even in different R sessions) will be essentially instantaenous (see below).
 
 ## The second function is `lookup_table`, which compiles a taxonomic resource for a set of species. By default this uses the taxonomy produced by `plant_lookup()` but an alternative taxonomy can be supplied to the argument `lookup_table=`.
 
@@ -49,7 +48,7 @@ angio_tax_alt <- lookup_table(angio_spp)
 head(angio_tax_alt)
 
 ## Let's subset the taxonomy so we only consider the genus, family and order columns
-angio_tax <- angio_tax[,c("genus", "family", "order")] 
+angio_tax <- angio_tax[,c("genus", "family", "order")]
 
 ## To run the phyndr algorithm, we need to supply the chronogram, the trait data with rownames set to species names, and the taxonomic table. Since we are using the taxonomic version of the algorithm, we use `phyndr_taxonomy`
 angio_phyndr <- phyndr_taxonomy(angio_phy, rownames(wood_dat), angio_tax)
@@ -69,10 +68,10 @@ str(angio_phyndr)
 library(rotl)
 
 ## To pull down the Meredith tree use the function `rotl::get_study_tree`
-mamm_phy <- make("meredith_tree")
+mamm_phy <- read.tree("../source_data/meredith.tre")
 
 ## And we are going to pull down a data set of basal metabolic rate for mammals from a compilation by [McNab 2008](http://www.sciencedirect.com/science/article/pii/S1095643308007782)
-bmr_dat <- make("bmr_data")
+bmr_dat <- read.csv("../source_data/bmr.csv", row.names=1)
 
 ## To get a taxonomy for this group, we are going to the [taxize](https://github.com/ropensci/taxize) to query the [NCBI Taxonomy Database](http://www.ncbi.nlm.nih.gov/taxonomy)
 library(taxize)
@@ -94,7 +93,7 @@ cls[no_swap] <- NULL
 ## Put the taxonomy together and select the columns of interest
 mamm_tax <- cbind(cls)
 rownames(mamm_tax) <- mamm_spp
-mamm_tax <- mamm_tax[,c("genus", "family", "order")]
+mamm_tax <- mamm_tax[,c("genus", "family")]
 head(mamm_tax)
 
 ## **Note: phyndr is dumb. It assumes that every column in your taxonomic table corresponds to a taxonomic rank and that these occur in ascending order (i.e., genus -> family -> order, etc.).**
@@ -124,26 +123,11 @@ mamm_class_tree
 ## The phylogeny used in [Zanne et al.](http://www.nature.com/nature/journal/v506/n7486/abs/nature12872.html) was much larger the Magallon phylogeny but was constructed using far fewer genes. In this case, we might want to use the Magallon tree for our analysis and the Zanne tree to inform our swaps.
 
 ## Load the Zanne tree into the workspace
-zae_phy <- make("zanne_tree")
+zae_phy <- read.tree("../source_data/zanne.tre")
 
 ## And use the function `phyndr_topology`
 angio_zae_phyndr <-  phyndr_topology(angio_phy, rownames(wood_dat), zae_phy)
 angio_zae_phyndr
-
-## ### With the Open Tree of Life API
-
-## Alternatively, we could query the OpenTree of Life API to obtain the best synthetic tree for our group. This tree will represent a synthesis of a variety of studies and, perhaps, taxonomy where phylogenetic information is lacking. It is therefore an ideal place to get a topological hypothesis for phyndr but in some cases, may not be idea for analyzing comparative data with. This is simply a small example to inspire you to explore further and we point you to the [rotl documentation](https://github.com/ropensci/rotl) for more information and ideas.
-
-## Let's go back to the mammal example. Given our list of species, we need to first use Open Tree's Taxonomic Name Resolution Service to generate a set of reference IDs
-otl_names <- tnrs_match_names(mamm_spp)
-
-## Then we can use these ID's to query the Open Tree API for the synthetic tree including these taxa
-mamm_otl_phy <- tol_induced_subtree(ott_ids=otl_names$ott_id)
-
-## And then, as with the plant example above, use the topology to inform our swaps
-mamm_otl_phyndr <- phyndr_topology(mamm_phy, rownames(bmr_dat), mamm_otl_phy)
-mamm_otl_phyndr
-
 
 ## ## Additional features of taxonlookup
 
@@ -169,4 +153,3 @@ plant_lookup_version_current()
 head(plant_lookup(version="0.2.1"))
 
 ## this will download the data from the appropriate github release, and should allow for easy access to both new and old versions and allow for easier reproducibility.
-

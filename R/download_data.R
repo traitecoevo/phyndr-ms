@@ -14,13 +14,23 @@ clean_magallon_tiplabel <- function(tree){
     tree
 }
 
-load_zae_tree <- function(filename){
+write_mag_tree <- function(tree)
+  write.tree(tree, "source_data/magallon.tre")
+
+write_woody_dat <- function(wood){
+  write.csv(wood, "source_data/wood.csv")
+}
+
+build_zae_tree <- function(filename){
     tmp <- tempdir()
     oo <- options(warn=2)
     on.exit(options(oo))
     file <- 'PhylogeneticResources/Vascular_Plants_rooted.dated.tre'
     unzip(filename, file, junkpaths=TRUE, exdir=tmp)
-    read.tree(file.path(tmp, basename(file)))
+    t <- read.tree(file.path(tmp, basename(file)))
+    ## write to file for use in vignette
+    write.tree(t, "source_data/zanne.tre")
+    t
 }
 
 load_woody_data <- function(filename){
@@ -29,22 +39,28 @@ load_woody_data <- function(filename){
     w[,c("woodiness", "woodiness.count")]
 }
 
-bmr_dat_xlsx <- function(filename){
+build_bmr_dat <- function(filename){
   b <- read_excel(filename, skip=6)
   rownames(b) <- sapply(b[,"Genus Species"], function(x) gsub(" ", "_", x))
   b <- b[,c("Mass (g)", "BMR (W)")]
   colnames(b) <- c("mass", "bmr")
+  ## write to file for use in vignette
+  write.csv(b, "source_data/bmr.csv")
   b
 }
 
-load_meredith_tree <- function(filename){
+build_meredith_tree <- function(filename){
     t <- read.tree(filename)
 
     ## Fix up names with rotl version because species epithet missing from file
-    drop <- c("Leporidae", "Hydrochaeris", "Agouti")
+    drop <- c("Leporidae", "Hydrochaeris", "Agouti",
+    "Emballonuridae", "Hippopotamidae", "Geomyidae",
+    "Gliridae", "Sciuridae")
     t <- phyndr:::drop_tip(t, drop)
     mer <- rotl::get_study_tree(study_id="pg_1428", tree_id="tree2855")
     tmp <- sapply(t$tip.label, function(x) grep(x, mer$tip.label))
     t$tip.label <- mer$tip.label[unlist(tmp)]
+    ## write to file for use in vignette
+    write.tree(t, "source_data/meredith.tre")
     t
 }

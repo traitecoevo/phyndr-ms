@@ -7,15 +7,26 @@ packages:
   - diversitree
   - phyndr
   - sowsear
-  - markdown
+  - knitr
+  - rmarkdown
   - taxonlookup
   - rncl
   - rotl
   - taxize
   - readxl
 
+knitr_options:
+  vignette:
+    auto_figure_prefix: true
+    chdir: true
+
 targets:
   all:
+    depends:
+      - ms/phyndr-ms.pdf
+      - vignette/vignette.html
+
+  ms:
     depends:
       - ms/phyndr-ms.pdf
   ms/phyndr-ms.pdf:
@@ -31,6 +42,11 @@ targets:
       width: 6
       height: 4
 
+  vignette:
+    depends:
+      - vignette/vignette.html
+
+## Manuscript
   source_data/magallon_tree.nex:
     download: http://datadryad.org/bitstream/handle/10255/dryad.76144/Magallon_etal_PL_ML.nex?sequence=1
   magallon_tree:
@@ -50,11 +66,36 @@ targets:
       width: 6
       height: 6
 
+## Vignette
+  vignette/vignette.html:
+    command: render("vignette/vignette.md", quiet=TRUE)
+  vignette/vignette.md:
+    knitr: vignette
+    depends:
+      - source_data/magallon.tre
+      - source_data/wood.csv
+      - source_data/meredith.tre
+      - source_data/bmr.csv
+      - source_data/zanne.tre
+  vignette/vignette.Rmd:
+    command: sowsear("vignette/vignette.R")
+
+## Write objects used in main text to file
+  source_data/magallon.tre:
+    command: write_mag_tree(magallon_tree_modified)
+  source_data/wood.csv:
+    command: write_woody_dat(woody_data)
+
+## Write vignette-specific files
   source_data/bmr_data_test.xls:
     download: http://www.nature.com/nature/journal/v464/n7289/extref/nature08920-s2.xls
-  bmr_data:
-    command: bmr_dat_xlsx("source_data/bmr_data_test.xls")
+  source_data/bmr.csv:
+    command: build_bmr_dat("source_data/bmr_data_test.xls")
   source_data/meredith_mammal.tre:
     download: http://datadryad.org/bitstream/handle/10255/dryad.56186/Mammalia.tre?sequence=1
-  meredith_tree:
-    command: load_meredith_tree("source_data/meredith_mammal.tre")
+  source_data/meredith.tre:
+    command: build_meredith_tree("source_data/meredith_mammal.tre")
+  source_data/zae_tree.zip:
+    download: http://datadryad.org/bitstream/handle/10255/dryad.55548/PhylogeneticResources.zip?sequence=1
+  source_data/zanne.tre:
+    command: build_zae_tree("source_data/zae_tree.zip")
