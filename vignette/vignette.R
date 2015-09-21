@@ -43,7 +43,7 @@ angio_spp <- unique(c(angio_phy$tip.label, rownames(wood_dat)))
 ## Get a taxonomic lookup table for this vector of names
 angio_tax <- lookup_table(angio_spp, by_species=TRUE)
 head(angio_tax)
-## The `by_species=TRUE` flag (which is not the default) provides a taxonomic classification for each species. This is what is needed for the `phyndr_`. The default `by_species=FALSE` avoids redundancies and subsets the taxonomic table by higher groups that are represented in the species list. For example,
+## The `by_species=TRUE` flag (which is not the default) provides a taxonomic classification for each species. This is what is needed by `phyndr_taxonomy`. The default `by_species=FALSE` avoids redundancies and subsets the taxonomic table by higher groups that are represented in the species list. For example,
 angio_tax_alt <- lookup_table(angio_spp)
 head(angio_tax_alt)
 
