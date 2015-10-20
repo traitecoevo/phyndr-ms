@@ -103,7 +103,7 @@ head(angio_tax)
 ## Idesia_spp.         Idesia Salicaceae Malpighiales Angiosperms
 ## Populus_spp.       Populus Salicaceae Malpighiales Angiosperms
 ```
-The `by_species=TRUE` flag (which is not the default) provides a taxonomic classification for each species. This is what is needed for the `phyndr_`. The default `by_species=FALSE` avoids redundancies and subsets the taxonomic table by higher groups that are represented in the species list. For example,
+The `by_species=TRUE` flag (which is not the default) provides a taxonomic classification for each species. This is what is needed by `phyndr_taxonomy`. The default `by_species=FALSE` avoids redundancies and subsets the taxonomic table by higher groups that are represented in the species list. For example,
 
 ```r
 angio_tax_alt <- lookup_table(angio_spp)
@@ -271,15 +271,7 @@ str(angio_phyndr)
 
 As mentioned above, the taxonomic resources in taxonlookup are currently only available for land plants. Therefore, if we want to use the taxonomic version of phyndr with some other group of organisms (or you are working with plants and want to use an alternative taxonomy), we need to supply our own taxonomy from somewhere else. One convenient way to obtain a taxonomy is to query online databases. A number of packages have been developed to facilitate this.
 
-Here we are going to use the R interface to the [Open Tree of Life](http://opentreeoflife.org/) [API](https://github.com/OpenTreeOfLife/opentree/wiki/Open-Tree-of-Life-APIs) [rotl](https://github.com/ropensci/rotl) to obtain a tree of mammals from a study by [Meredith et al. 2011](http://www.sciencemag.org/content/334/6055/521.short).
-
-To use rotl we first need to install the following packages
-
-```r
-library(rotl)
-```
-
-To pull down the Meredith tree use the function `rotl::get_study_tree`
+For this example, we are going to use a tree of mammals from a study by [Meredith et al. 2011](http://www.sciencemag.org/content/334/6055/521.short).
 
 ```r
 mamm_phy <- read.tree("../source_data/meredith.tre")
