@@ -41,12 +41,12 @@ load_woody_data <- function(filename){
 
 build_bmr_dat <- function(filename){
   b <- read_excel(filename, skip=6)
-  rownames(b) <- sapply(b[,"Genus Species"], function(x) gsub(" ", "_", x))
-  b <- b[,c("Mass (g)", "BMR (W)")]
-  colnames(b) <- c("mass", "bmr")
+  bmr <- b[,c("Mass (g)", "BMR (W)")]
+  colnames(bmr) <- c("mass", "bmr")
+  rownames(bmr) <- sapply(b[,"Genus Species"], function(x) gsub(" ", "_", x))
   ## write to file for use in vignette
-  write.csv(b, "source_data/bmr.csv")
-  b
+  write.csv(bmr, "source_data/bmr.csv")
+  bmr
 }
 
 build_meredith_tree <- function(filename){
