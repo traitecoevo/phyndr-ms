@@ -175,7 +175,7 @@ The \texttt{phyndr\_} functions each generate an object of class \texttt{`phyndr
 
 The {\taxonlookup} R package dynamically builds a taxonomic lookup table for vascular plants from three canonical sources: \textsc{The Plant List} \citep{ThePlantList}, Linnaean taxonomy (families and orders) from \textsc{APWeb} \citep{apweb}, and a recently published higher taxa lookup table that includes non-Linnaean node names \citep[][compiled by D.C. Tank, J.M. Eastman, J.M. Beaulieu, W.K. Cornwell, P.F. Stevens, and A.E. Zanne]{ZanneDryad}.  Moreover, unlike existing plant taxonomy tools, {\taxonlookup} is complete --- all genera accepted by  \textsc{The Plant List} match exactly one family.  Species diversity numbers for each genus from \textsc{The Plant List} are also easily accessible.  
 
-The lookup table within {\taxonlookup} is also explicitly versioned and previous versions will be available via the R package.   The version of the underlying data associated with this paper is version 1.0.0 and has DOI ADD FINAL DOI HERE.   Each new version of {\taxonlookup} will have new version numbers and DOIs.  This system is designed to aid in building reproducible workflows --- at any future time users will be able to programatically access specific stable older versions of the lookup to reproduce particular analyses. 
+The lookup table within {\taxonlookup} is also explicitly versioned and previous versions will be available via the R package.   The version of the underlying data associated with this paper is version 1.0.1 and has its own DOI (10.5281/zenodo.33930).   Each new version of {\taxonlookup} will have new version numbers and DOIs.  This system is designed to aid in building reproducible workflows --- at any future time users will be able to programatically access specific stable older versions of the lookup to reproduce particular analyses. 
 
 {\taxonlookup} is designed to form part of a workflow with a name standardization tool such as \textsc{taxonstand} \citep{Cayuela2014} or \textsc{tnrs} \citep{boyle2013taxonomic}.  Any tool that uses \textsc{The Plant List  v1.1} as source data, should work well with {\taxonlookup}.   
  {\taxonlookup} is available on GitHub (\url{https://github.com/traitecoevo/taxonlookup}); currently only land plants are covered by this resource, but the system could be extended to cover other taxa. 
@@ -218,6 +218,9 @@ We thank the members of the Tempo and Mode of Plant Trait
 Evolution working group for stimulating discussions of this problem. In particular, we are grateful to Luke Harmon, Josef Uyeda, Eliot Miller, Amy Zanne, and Hannah Marx, for advice and comments. We thank Fran\c{c}ois Michonneau (who provided his review as a GitHub pull request), Steven Kembel, and an anonymous reviewer for useful feedback on the manuscript and software. We thank Scott Chamberlain and the ROpenSci organization for technical assistance with the taxonomic resources. This work was supported by the National Evolutionary Synthesis Center
 (NESCent), NSF \#EF- 0905606, Macquarie University Genes to Geoscience
 Research Centre through the working group. MWP was supported by a NSERC postgraduate fellowship, a NSERC postdoctoral fellowship, and an Izaak Walton Killam Memorial postdoctoral fellowship. This work was also supported by a NSF grant awarded to Luke J. Harmon (DEB 1208912) at the University of Idaho.
+
+\section{Data accessibility}
+The current version of {\taxonlookup} is available on GitHub (\url{https://github.com/traitecoevo/taxonlookup}); as described in the main text, each version will have its own DOI (current: 10.5281/zenodo.33930). A stable version (v1.0.1) of the dataset is available on the Dryad Data Repository (DOI: 10.5061/dryad.5d3rq). 
 
 
 \clearpage
